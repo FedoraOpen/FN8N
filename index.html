@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Évaluation Universitaire</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .messages {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .question {
+            background-color: #e8f4fc;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Évaluation Universitaire</h1>
+        
+        <div class="messages" id="chat-messages">
+            <div class="question">Veuillez vous identifier pour commencer l'évaluation.</div>
+        </div>
+        
+        <div class="form-group">
+            <label for="studentId">Identifiant étudiant:</label>
+            <input type="text" id="studentId" name="studentId" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="response">Votre réponse:</label>
+            <textarea id="response" name="response" required></textarea>
+        </div>
+        
+        <button id="submit-btn" onclick="sendResponse()">Envoyer</button>
+    </div>
+
+    <script>
+        // Remplacez cette URL par l'URL de votre webhook N8N
+        const webhookUrl = "VOTRE_URL_WEBHOOK_ICI";
+        
+        let conversationHistory = [];
+        
+        function sendResponse() {
+            const studentId = document.getElementById('studentId').value;
+            const response = document.getElementById('response').value;
+            
+            if (!studentId || !response) {
+                alert("Veuillez remplir tous les champs.");
+                return;
+            }
+            
+            // Désactiver le bouton pendant l'envoi
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Envoi en cours...";
+            
+            // Préparer les données à envoyer au webhook
+            const data = {
+                studentId: studentId,
+                response: response,
+                history: conversationHistory
+            };
+            
+            // Envoyer la requête au webhook
+            fetch(webhookUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Ajouter les messages à l'historique
+                conversationHistory.push({
+                    role: "student",
+                    content: response
+                });
+                
+                if (data.question) {
+                    conversationHistory.push({
+                        role: "professor",
+                        content: data.question
+                    });
+                    
+                    // Afficher la nouvelle question
+                    const messagesDiv = document.getElementById('chat-messages');
+                    const studentResponse = document.createElement('div');
+                    studentResponse.textContent = "Vous: " + response;
+                    studentResponse.style.marginBottom = "10px";
+                    
+                    const professorQuestion = document.createElement('div');
+                    professorQuestion.textContent = "Professeur: " + data.question;
+                    professorQuestion.className = "question";
+                    
+                    messagesDiv.appendChild(studentResponse);
+                    messagesDiv.appendChild(professorQuestion);
+                    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                }
+                
+                // Vider le champ de réponse
+                document.getElementById('response').value = "";
+                
+                // Réactiver le bouton
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Envoyer";
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert("Une erreur s'est produite. Veuillez réessayer.");
+                
+                // Réactiver le bouton
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Envoyer";
+            });
+        }
+    </script>
+</body>
+</html>
