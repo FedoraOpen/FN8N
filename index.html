@@ -67,14 +67,6 @@
             border-radius: 4px;
             margin-bottom: 10px;
         }
-        .debug-panel {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #f5f5f5;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            display: none;
-        }
     </style>
 </head>
 <body>
@@ -96,28 +88,13 @@
         </div>
         
         <button id="submit-btn" onclick="sendResponse()">Envoyer</button>
-        
-        <div class="debug-panel" id="debug-panel">
-            <h3>Panneau de débogage</h3>
-            <div id="debug-output"></div>
-        </div>
     </div>
 
     <script>
-        // Remplacez cette URL par l'URL de votre webhook N8N (URL de production)
+        // Remplacez cette URL par l'URL de votre webhook N8N
         const webhookUrl = "https://n8n-1o1i.onrender.com/webhook/5815bf25-138f-4fa3-8b67-62ddc2095a3e";
         
         let conversationHistory = [];
-        
-        // Fonction pour ajouter des informations de débogage
-        function addDebugInfo(message) {
-            console.log(message);
-            
-            // Activer cette ligne si vous voulez afficher les logs dans l'interface
-            // document.getElementById('debug-panel').style.display = 'block';
-            // const debugOutput = document.getElementById('debug-output');
-            // debugOutput.innerHTML += `<p>${new Date().toLocaleTimeString()}: ${message}</p>`;
-        }
         
         function sendResponse() {
             const studentId = document.getElementById('studentId').value;
@@ -140,9 +117,6 @@
                 history: conversationHistory
             };
             
-            // Log des données envoyées
-            addDebugInfo("Données envoyées au webhook: " + JSON.stringify(data));
-            
             // Envoyer la requête au webhook
             fetch(webhookUrl, {
                 method: 'POST',
@@ -151,18 +125,8 @@
                 },
                 body: JSON.stringify(data)
             })
-            .then(response => {
-                addDebugInfo("Statut de la réponse: " + response.status);
-                if (!response.ok) {
-                    addDebugInfo("Erreur HTTP: " + response.status + " " + response.statusText);
-                    throw new Error("Statut HTTP: " + response.status);
-                }
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
-                // Log des données reçues
-                addDebugInfo("Données reçues du webhook: " + JSON.stringify(data));
-                
                 // Ajouter les messages à l'historique
                 conversationHistory.push({
                     role: "student",
@@ -188,8 +152,6 @@
                     messagesDiv.appendChild(studentResponse);
                     messagesDiv.appendChild(professorQuestion);
                     messagesDiv.scrollTop = messagesDiv.scrollHeight;
-                } else {
-                    addDebugInfo("Attention: La réponse ne contient pas de champ 'question'");
                 }
                 
                 // Vider le champ de réponse
@@ -200,9 +162,8 @@
                 submitBtn.textContent = "Envoyer";
             })
             .catch(error => {
-                addDebugInfo("Erreur: " + error.message);
-                console.error('Erreur complète:', error);
-                alert("Une erreur s'est produite. Veuillez réessayer. Consultez la console pour plus de détails.");
+                console.error('Erreur:', error);
+                alert("Une erreur s'est produite. Veuillez réessayer.");
                 
                 // Réactiver le bouton
                 submitBtn.disabled = false;
