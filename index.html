@@ -97,6 +97,48 @@
         let conversationHistory = [];
         
         function sendResponse() {
+
+            function sendResponse() {
+    const studentId = document.getElementById('studentId').value;
+    const response = document.getElementById('response').value;
+    
+    if (!studentId || !response) {
+        alert("Veuillez remplir tous les champs.");
+        return;
+    }
+    
+    // Désactiver le bouton pendant l'envoi
+    const submitBtn = document.getElementById('submit-btn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Envoi en cours...";
+    
+    // Préparer les données à envoyer au webhook
+    const data = {
+        studentId: studentId,
+        response: response,
+        history: conversationHistory
+    };
+    
+    // Ajouter ce log pour voir les données envoyées
+    console.log("Données envoyées au webhook:", data);
+    
+    // Envoyer la requête au webhook
+    fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => {
+        console.log("Statut de la réponse:", response.status);
+        return response.json();
+    })
+    .then(data => {
+        // Ajouter ce log pour voir les données reçues
+        console.log("Données reçues du webhook:", data);
+        
+        // Reste de votre code...
             const studentId = document.getElementById('studentId').value;
             const response = document.getElementById('response').value;
             
