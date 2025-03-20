@@ -91,7 +91,7 @@
     </div>
 
     <script>
-        // Remplacez cette URL par l'URL de votre webhook N8N
+        // URL de production du webhook N8N
         const webhookUrl = "https://n8n-1o1i.onrender.com/webhook/5815bf25-138f-4fa3-8b67-62ddc2095a3e";
         
         let conversationHistory = [];
@@ -117,6 +117,9 @@
                 history: conversationHistory
             };
             
+            // Log des données envoyées
+            console.log("Données envoyées:", data);
+            
             // Envoyer la requête au webhook
             fetch(webhookUrl, {
                 method: 'POST',
@@ -125,8 +128,13 @@
                 },
                 body: JSON.stringify(data)
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log("Statut de la réponse:", response.status);
+                return response.json();
+            })
             .then(data => {
+                console.log("Données reçues:", data);
+                
                 // Ajouter les messages à l'historique
                 conversationHistory.push({
                     role: "student",
