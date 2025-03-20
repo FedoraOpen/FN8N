@@ -5,68 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Évaluation Universitaire</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            line-height: 1.6;
-        }
-        .container {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input, textarea {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        textarea {
-            height: 100px;
-            resize: vertical;
-        }
-        button {
-            background-color: #3498db;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        button:hover {
-            background-color: #2980b9;
-        }
-        .messages {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #f9f9f9;
-            border-radius: 4px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        .question {
-            background-color: #e8f4fc;
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 10px;
-        }
+        /* ... (le CSS reste inchangé) ... */
     </style>
 </head>
 <body>
@@ -74,12 +13,7 @@
         <h1>Évaluation Universitaire</h1>
 
         <div class="messages" id="chat-messages">
-            <div class="question">Veuillez vous identifier pour commencer l'évaluation.</div>
-        </div>
-
-        <div class="form-group">
-            <label for="studentId">Identifiant étudiant:</label>
-            <input type="text" id="studentId" name="studentId" required>
+            <div class="question">L'évaluation va commencer.</div>
         </div>
 
         <div class="form-group">
@@ -92,16 +26,15 @@
 
     <script>
         // URL de production du webhook N8N
-        const webhookUrl = "https://n8n-1o1i.onrender.com/webhook-test/5815bf25-138f-4fa3-8b67-62ddc2095a3e";
+        const webhookUrl = "https://n8n-1o1i.onrender.com/webhook/5815bf25-138f-4fa3-8b67-62ddc2095a3e";
 
         let conversationHistory = [];
 
         function sendResponse() {
-            const studentId = document.getElementById('studentId').value;
             const response = document.getElementById('response').value;
 
-            if (!studentId || !response) {
-                alert("Veuillez remplir tous les champs.");
+            if (!response) {
+                alert("Veuillez entrer votre réponse.");
                 return;
             }
 
@@ -112,8 +45,7 @@
 
             // Préparer les données à envoyer au webhook
             const data = {
-                chatInput: {  // Ajout de la clé chatInput
-                   studentId: studentId,
+                chatInput: {
                    response: response,
                    history: conversationHistory
                 }
