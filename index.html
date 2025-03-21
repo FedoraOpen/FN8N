@@ -7,133 +7,208 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
         }
-
         .container {
-            background-color: white;
+            border: 1px solid #ddd;
             border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            padding: 30px;
-            width: 400px; /* Ajustez la largeur selon vos besoins */
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
             text-align: center;
         }
-
-        h1 {
-            color: #333;
-            margin-bottom: 20px;
+        .form-group {
+            margin-bottom: 15px;
         }
-
-        .instructions {
-            color: #555;
-            margin-bottom: 30px;
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-
         label {
             display: block;
             margin-bottom: 5px;
-            color: #333;
             font-weight: bold;
         }
-
-        input[type="text"],
-        textarea {
+        input, textarea {
             width: 100%;
-            padding: 10px;
+            padding: 8px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            box-sizing: border-box; /* Important pour que le padding ne change pas la largeur */
-            font-size: 16px;
+            box-sizing: border-box;
         }
-
         textarea {
-            resize: vertical; /* Permet de redimensionner verticalement */
             height: 100px;
+            resize: vertical;
         }
-
-         button {
-            background-color: #2980b9; /* Bleu */
+        button {
+            background-color: #3498db;
             color: white;
-            padding: 10px 15px;
             border: none;
-            border-radius: 5px;
+            padding: 10px 15px;
+            border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
-            transition: background-color 0.3s ease;
-            width: 100%;
         }
-
         button:hover {
-            background-color: #3498db; /* Bleu plus clair au survol */
+            background-color: #2980b9;
         }
-        /* Plus besoin de ce style car chatbox est supprimé d'ici
-        #chatbox {
-            border: 1px solid #ccc;
+        .messages {
+            margin-top: 20px;
             padding: 10px;
-            height: 200px;
-            overflow-y: scroll;
-            margin-bottom: 1rem;
             background-color: #f9f9f9;
+            border-radius: 4px;
+            max-height: 300px;
+            overflow-y: auto;
         }
-*/
-        .message {
-          margin-bottom: 0.5rem;
-          line-height: 1.4;
+        .question {
+            background-color: #e8f4fc;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
         }
-
-        .user-message {
-          text-align: right;
-          color: #007bff; /* Bleu pour les messages de l'utilisateur */
+        .debug-panel {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: none;
         }
-
-        .bot-message {
-          text-align: left;
-          color: #28a745; /* Vert pour les messages du chatbot */
-        }
-
-
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Évaluation Universitaire</h1>
-        <p class="instructions">Veuillez vous identifier pour commencer l'évaluation.</p>
-
-        <div class="input-group">
+        
+        <div class="messages" id="chat-messages">
+            <div class="question">Veuillez vous identifier pour commencer l'évaluation.</div>
+        </div>
+        
+        <div class="form-group">
             <label for="studentId">Identifiant étudiant:</label>
-            <input type="text" id="studentId">
+            <input type="text" id="studentId" name="studentId" required>
         </div>
-        <div class="input-group">
-            <label for="userInput">Votre réponse:</label>
-            <textarea id="userInput"></textarea>
+        
+        <div class="form-group">
+            <label for="response">Votre réponse:</label>
+            <textarea id="response" name="response" required></textarea>
         </div>
-        <button id="submitBtn">Envoyer</button>
+        
+        <button id="submit-btn" onclick="sendResponse()">Envoyer</button>
+        
+        <div class="debug-panel" id="debug-panel">
+            <h3>Panneau de débogage</h3>
+            <div id="debug-output"></div>
+        </div>
     </div>
 
     <script>
-      const studentIdInput = document.getElementById('studentId');
-      const userInput = document.getElementById('userInput');
-      const submitBtn = document.getElementById('submitBtn');
-
-      function addMessage(message, sender) {
-        // On créera un élément pour afficher les messages plus tard,
-        // quand on aura besoin d'afficher la réponse du chatbot.
-        // Pour l'instant, cette fonction ne fait rien.
-      }
-
-      // La partie envoie de la requête sera complétée dans la prochaine étape
-
+        // Remplacez cette URL par l'URL de votre webhook N8N (URL de production)
+        const webhookUrl = "https://n8n-1o1i.onrender.com/webhook/5815bf25-138f-4fa3-8b67-62ddc2095a3e";
+        
+        let conversationHistory = [];
+        
+        // Fonction pour ajouter des informations de débogage
+        function addDebugInfo(message) {
+            console.log(message);
+            
+            // Activer cette ligne si vous voulez afficher les logs dans l'interface
+            // document.getElementById('debug-panel').style.display = 'block';
+            // const debugOutput = document.getElementById('debug-output');
+            // debugOutput.innerHTML += `<p>${new Date().toLocaleTimeString()}: ${message}</p>`;
+        }
+        
+        function sendResponse() {
+            const studentId = document.getElementById('studentId').value;
+            const response = document.getElementById('response').value;
+            
+            if (!studentId || !response) {
+                alert("Veuillez remplir tous les champs.");
+                return;
+            }
+            
+            // Désactiver le bouton pendant l'envoi
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Envoi en cours...";
+            
+            // Préparer les données à envoyer au webhook
+            const data = {
+                studentId: studentId,
+                response: response,
+                history: conversationHistory
+            };
+            
+            // Log des données envoyées
+            addDebugInfo("Données envoyées au webhook: " + JSON.stringify(data));
+            
+            // Envoyer la requête au webhook
+            fetch(webhookUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                addDebugInfo("Statut de la réponse: " + response.status);
+                if (!response.ok) {
+                    addDebugInfo("Erreur HTTP: " + response.status + " " + response.statusText);
+                    throw new Error("Statut HTTP: " + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Log des données reçues
+                addDebugInfo("Données reçues du webhook: " + JSON.stringify(data));
+                
+                // Ajouter les messages à l'historique
+                conversationHistory.push({
+                    role: "student",
+                    content: response
+                });
+                
+                if (data.question) {
+                    conversationHistory.push({
+                        role: "professor",
+                        content: data.question
+                    });
+                    
+                    // Afficher la nouvelle question
+                    const messagesDiv = document.getElementById('chat-messages');
+                    const studentResponse = document.createElement('div');
+                    studentResponse.textContent = "Vous: " + response;
+                    studentResponse.style.marginBottom = "10px";
+                    
+                    const professorQuestion = document.createElement('div');
+                    professorQuestion.textContent = "Professeur: " + data.question;
+                    professorQuestion.className = "question";
+                    
+                    messagesDiv.appendChild(studentResponse);
+                    messagesDiv.appendChild(professorQuestion);
+                    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                } else {
+                    addDebugInfo("Attention: La réponse ne contient pas de champ 'question'");
+                }
+                
+                // Vider le champ de réponse
+                document.getElementById('response').value = "";
+                
+                // Réactiver le bouton
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Envoyer";
+            })
+            .catch(error => {
+                addDebugInfo("Erreur: " + error.message);
+                console.error('Erreur complète:', error);
+                alert("Une erreur s'est produite. Veuillez réessayer. Consultez la console pour plus de détails.");
+                
+                // Réactiver le bouton
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Envoyer";
+            });
+        }
     </script>
 </body>
 </html>
