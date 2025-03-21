@@ -22,6 +22,7 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             padding: 30px;
             width: 600px;
+            max-width: 90%;
             text-align: center;
         }
 
@@ -119,12 +120,46 @@
             60% { content: '...'; }
             80%, 100% { content: ''; }
         }
+
+        .config-panel {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f0f8ff;
+            border-radius: 5px;
+            border: 1px solid #b0e0e6;
+            text-align: left;
+        }
+
+        .config-panel h3 {
+            margin-top: 0;
+            color: #2980b9;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            margin-top: 10px;
+            display: none;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Évaluation Universitaire - Métrorragies</h1>
         <p class="instructions">Bienvenue à cette évaluation sur les métrorragies. Veuillez entrer votre nom et prénom pour commencer.</p>
+        
+        <div class="config-panel" id="configPanel">
+            <h3>Configuration</h3>
+            <div class="input-group">
+                <label for="n8nUrl">URL de votre instance N8N:</label>
+                <input type="text" id="n8nUrl" placeholder="https://votre-instance-n8n.com">
+            </div>
+            <div class="input-group">
+                <label for="webhookPath">Chemin du webhook:</label>
+                <input type="text" id="webhookPath" value="webhook/eval-chatbot">
+            </div>
+            <button id="saveConfigButton">Enregistrer la configuration</button>
+            <div class="error-message" id="configError"></div>
+        </div>
         
         <div id="chatbox"></div>
         
@@ -138,8 +173,9 @@
             <textarea id="userInput" placeholder="Tapez votre réponse ici..."></textarea>
         </div>
         
-        <button id="sendButton">Envoyer</button>
+        <button id="sendButton" disabled>Envoyer</button>
         <div class="loading" id="loading">Chargement</div>
+        <div class="error-message" id="connectionError"></div>
     </div>
 
     <script>
@@ -150,12 +186,76 @@
             const sendButton = document.getElementById('sendButton');
             const loading = document.getElementById('loading');
             const studentIdLabel = document.getElementById('studentIdLabel');
+            const configPanel = document.getElementById('configPanel');
+            const n8nUrlInput = document.getElementById('n8nUrl');
+            const webhookPathInput = document.getElementById('webhookPath');
+            const saveConfigButton = document.getElementById('saveConfigButton');
+            const configError = document.getElementById('configError');
+            const connectionError = document.getElementById('connectionError');
             
-            // URL du webhook N8N
-            const webhookUrl = 'https://votre-instance-n8n.com/webhook-test/eval-chatbot';
+            // Vérifier si la configuration est déjà enregistrée dans le localStorage
+            const savedN8nUrl = localStorage.getItem('n8nUrl');
+            const savedWebhookPath = localStorage.getItem('webhookPath');
             
-            // Ajouter un message initial du bot
-            addBotMessage("Bonjour, merci de me communiquer votre Nom et Prénom.");
+            if (savedN8nUrl && savedWebhookPath) {
+                n8nUrlInput.value = savedN8nUrl;
+                webhookPathInput.value = savedWebhookPath;
+            }
+            
+            // Fonction pour valider l'URL
+            function isValidUrl(url) {
+                try {
+                    new URL(url);
+                    return true;
+                } catch (e) {
+                    return false;
+                }
+            }
+            
+            // Fonction pour enregistrer la configuration
+            function saveConfig() {
+                const n8nUrl = n8nUrlInput.value.trim();
+                const webhookPath = webhookPathInput.value.trim();
+                
+                // Valider l'URL
+                if (!n8nUrl || !isValidUrl(n8nUrl)) {
+                    configError.textContent = "Veuillez entrer une URL valide pour votre instance N8N.";
+                    configError.style.display = 'block';
+                    return;
+                }
+                
+                // Valider le chemin du webhook
+                if (!webhookPath) {
+                    configError.textContent = "Veuillez entrer le chemin du webhook.";
+                    configError.style.display = 'block';
+                    return;
+                }
+                
+                // Enregistrer la configuration dans le localStorage
+                localStorage.setItem('n8nUrl', n8nUrl);
+                localStorage.setItem('webhookPath', webhookPath);
+                
+                // Masquer le panneau de configuration
+                configPanel.style.display = 'none';
+                
+                // Activer le bouton d'envoi
+                sendButton.disabled = false;
+                
+                // Ajouter un message initial du bot
+                addBotMessage("Bonjour, merci de me communiquer votre Nom et Prénom.");
+            }
+            
+            // Événement de clic sur le bouton d'enregistrement de la configuration
+            saveConfigButton.addEventListener('click', saveConfig);
+            
+            // Si la configuration est déjà enregistrée, masquer le panneau de configuration et activer le bouton d'envoi
+            if (savedN8nUrl && savedWebhookPath) {
+                configPanel.style.display = 'none';
+                sendButton.disabled = false;
+                
+                // Ajouter un message initial du bot
+                addBotMessage("Bonjour, merci de me communiquer votre Nom et Prénom.");
+            }
             
             // Fonction pour ajouter un message de l'utilisateur au chatbox
             function addUserMessage(message) {
@@ -175,6 +275,18 @@
                 chatbox.scrollTop = chatbox.scrollHeight;
             }
             
+            // Fonction pour construire l'URL complète du webhook
+            function getWebhookUrl() {
+                const n8nUrl = localStorage.getItem('n8nUrl');
+                const webhookPath = localStorage.getItem('webhookPath');
+                
+                // S'assurer que l'URL n'a pas de slash à la fin et que le chemin n'a pas de slash au début
+                const baseUrl = n8nUrl.endsWith('/') ? n8nUrl.slice(0, -1) : n8nUrl;
+                const path = webhookPath.startsWith('/') ? webhookPath.slice(1) : webhookPath;
+                
+                return `${baseUrl}/${path}`;
+            }
+            
             // Fonction pour envoyer un message au webhook N8N
             async function sendMessage() {
                 const studentIdValue = studentId.value.trim();
@@ -190,6 +302,9 @@
                     return;
                 }
                 
+                // Masquer les messages d'erreur précédents
+                connectionError.style.display = 'none';
+                
                 // Afficher le message de l'utilisateur dans le chatbox
                 addUserMessage(userInputValue);
                 
@@ -201,6 +316,9 @@
                 sendButton.disabled = true;
                 
                 try {
+                    // Construire l'URL complète du webhook
+                    const webhookUrl = getWebhookUrl();
+                    
                     // Envoyer la requête au webhook N8N
                     const response = await fetch(webhookUrl, {
                         method: 'POST',
@@ -227,7 +345,12 @@
                     }
                 } catch (error) {
                     console.error('Erreur:', error);
+                    connectionError.textContent = `Erreur de connexion: ${error.message}. Vérifiez l'URL de votre instance N8N et assurez-vous que le webhook est correctement configuré.`;
+                    connectionError.style.display = 'block';
                     addBotMessage("Désolé, une erreur s'est produite lors de la communication avec le serveur.");
+                    
+                    // Afficher à nouveau le panneau de configuration en cas d'erreur
+                    configPanel.style.display = 'block';
                 } finally {
                     // Masquer l'indicateur de chargement
                     loading.style.display = 'none';
