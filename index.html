@@ -1,125 +1,257 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-   <meta charset="UTF-8">
-   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>Évaluation Universitaire</title>
-   <style>
-      body {
-         font-family: Arial, sans-serif;
-         background-color: #f4f4f4;
-         margin: 0;
-         padding: 0;
-         display: flex;
-         justify-content: center;
-         align-items: center;
-         min-height: 100vh;
-      }
-
-      .container {
-         background-color: white;
-         border-radius: 8pxD;
-         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-         padding: 30px;
-         width: 400px;
-         text-align: center;
-      }
-
-      h1'accord, je comprends ton point. Je suis sincèrement désolé pour la confusion. Voici {
-         color: #333;
-         margin-bottom: 20px;
-      }
-
-      .instructions {
-         color: #555;
-         margin-bottom: 30px;
-      }
-
-      .input-group {
-         margin-bottom un seul fichier `index.html`, complet et corrigé, qui devrait fonctionner avec toutes les modifications que nous avons faites :
-
-**Fichier index.html (unique et final) :**
-
-```html
-<!DOCTYPE html>
-<: 20px;
-         text-align: left;
-      }
-
-      label {
-         display: block;
-         margin-bottom: 5px;
-         color: #333;
-         font-weight: bold;
-      }
-
-      input[type="texthtml lang="fr">
-
-<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Évaluation Universitaire</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color:"],
-      textarea {
-         width: 100%;
-         padding: 10px;
-         border: 1px solid #ddd;
-         border-radius: 4px;
-         box-sizing: border-box;
-         font-size: 16px #f4f4f4;
+            background-color: #f4f4f4;
             margin: 0;
             padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-;
-      }
-
-      textarea {
-         resize: vertical;
-         height: 100px;
-      }
-
-      button {
-         background-color: #2980b9;
-         color: white;
-         padding: 10px 15px;
-height: 100vh;
+            min-height: 100vh;
         }
 
         .container {
             background-color: white;
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-         border: none;
-         border-radius: 5px;
-         cursor: pointer;
-         font-size: 16px;
-         transition: background-color 0.3s ease;
-         width: 100%;
-       }
+            padding: 30px;
+            width: 600px;
+            text-align: center;
+        }
 
-   button:hover {
-background-color: #3498db;
-   }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
 
-   #chatbox {
-   border: 1px solid #ccc;
-   padding: 10px;
-   height: 200px;
-   overflow-y: scroll;
-  margin-bottom: 1rem;
-  background-color: #f9f9f9;
-  }
+        .instructions {
+            color: #555;
+            margin-bottom: 30px;
+        }
 
-   .message {
-  margin-bottom: 0.5rem;
-  line-height: 1.4;
-}
-   .user-message {
-   text-align: right;
-borderId && userMessage) {
- addMessage(userMessage , console.log(studentId).value=
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        textarea {
+            resize: vertical;
+            height: 100px;
+        }
+
+        button {
+            background-color: #2980b9;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #3498db;
+        }
+
+        #chatbox {
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 300px;
+            overflow-y: scroll;
+            margin-bottom: 1rem;
+            background-color: #f9f9f9;
+            text-align: left;
+        }
+
+        .message {
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+        }
+
+        .user-message {
+            text-align: right;
+            color: #2980b9;
+        }
+
+        .bot-message {
+            text-align: left;
+            color: #333;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .loading:after {
+            content: '.';
+            animation: dots 1.5s steps(5, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60% { content: '...'; }
+            80%, 100% { content: ''; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Évaluation Universitaire - Métrorragies</h1>
+        <p class="instructions">Bienvenue à cette évaluation sur les métrorragies. Veuillez entrer votre nom et prénom pour commencer.</p>
+        
+        <div id="chatbox"></div>
+        
+        <div class="input-group">
+            <label for="studentId" id="studentIdLabel">Nom et Prénom:</label>
+            <input type="text" id="studentId" placeholder="Entrez votre nom et prénom">
+        </div>
+        
+        <div class="input-group">
+            <label for="userInput">Votre réponse:</label>
+            <textarea id="userInput" placeholder="Tapez votre réponse ici..."></textarea>
+        </div>
+        
+        <button id="sendButton">Envoyer</button>
+        <div class="loading" id="loading">Chargement</div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatbox = document.getElementById('chatbox');
+            const userInput = document.getElementById('userInput');
+            const studentId = document.getElementById('studentId');
+            const sendButton = document.getElementById('sendButton');
+            const loading = document.getElementById('loading');
+            const studentIdLabel = document.getElementById('studentIdLabel');
+            
+            // URL du webhook N8N
+            const webhookUrl = 'https://votre-instance-n8n.com/webhook-test/eval-chatbot';
+            
+            // Ajouter un message initial du bot
+            addBotMessage("Bonjour, merci de me communiquer votre Nom et Prénom.");
+            
+            // Fonction pour ajouter un message de l'utilisateur au chatbox
+            function addUserMessage(message) {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message', 'user-message');
+                messageElement.textContent = message;
+                chatbox.appendChild(messageElement);
+                chatbox.scrollTop = chatbox.scrollHeight;
+            }
+            
+            // Fonction pour ajouter un message du bot au chatbox
+            function addBotMessage(message) {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message', 'bot-message');
+                messageElement.textContent = message;
+                chatbox.appendChild(messageElement);
+                chatbox.scrollTop = chatbox.scrollHeight;
+            }
+            
+            // Fonction pour envoyer un message au webhook N8N
+            async function sendMessage() {
+                const studentIdValue = studentId.value.trim();
+                const userInputValue = userInput.value.trim();
+                
+                if (!studentIdValue) {
+                    alert("Veuillez entrer votre nom et prénom.");
+                    return;
+                }
+                
+                if (!userInputValue) {
+                    alert("Veuillez entrer votre réponse.");
+                    return;
+                }
+                
+                // Afficher le message de l'utilisateur dans le chatbox
+                addUserMessage(userInputValue);
+                
+                // Effacer le champ de saisie
+                userInput.value = '';
+                
+                // Afficher l'indicateur de chargement
+                loading.style.display = 'block';
+                sendButton.disabled = true;
+                
+                try {
+                    // Envoyer la requête au webhook N8N
+                    const response = await fetch(webhookUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            studentId: studentIdValue,
+                            userInput: userInputValue
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`Erreur HTTP: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    // Afficher la réponse du bot
+                    if (data && data.response) {
+                        addBotMessage(data.response);
+                    } else {
+                        addBotMessage("Désolé, je n'ai pas pu traiter votre demande.");
+                    }
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    addBotMessage("Désolé, une erreur s'est produite lors de la communication avec le serveur.");
+                } finally {
+                    // Masquer l'indicateur de chargement
+                    loading.style.display = 'none';
+                    sendButton.disabled = false;
+                    
+                    // Après la première soumission, masquer le champ studentId
+                    if (studentIdLabel.style.display !== 'none') {
+                        studentIdLabel.style.display = 'none';
+                        studentId.style.display = 'none';
+                    }
+                }
+            }
+            
+            // Événement de clic sur le bouton d'envoi
+            sendButton.addEventListener('click', sendMessage);
+            
+            // Événement de pression de la touche Entrée dans le champ de saisie
+            userInput.addEventListener('keypress', function(event) {
+                if (event.key === 'Enter' && !event.shiftKey) {
+                    event.preventDefault();
+                    sendMessage();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
