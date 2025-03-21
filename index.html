@@ -5,210 +5,237 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Évaluation Universitaire</title>
     <style>
-        body {
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+      width: 400px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .instructions {
+      color: #555;
+      margin-bottom: 30px;
+    }
+
+    .input-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #333;
+      font-weight: bold;
+    }
+
+    input[type="text"],
+    textarea {
+D      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+
+    'accord, voici toutes les instructions restantes pour finaliser la configuration de ton chatbot, le code `index.html` mis à jour, la procédure de test ettextarea {
+      resize: vertical;
+      height: 100px;
+    }
+
+    button {
+      background-color: #2980b9;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+      width: 100%;
+    }
+
+    button:hover {
+      background-color quelques éléments supplémentaires à considérer :
+
+**1. Configuration Restante dans n8n**
+
+*   **a) Modifier le nœud "Respond to Web: #3498db;
+    }
+
+    #chatbox {
+      border: 1px solid #ccc;
+      padding: 10px;
+      height: 200px;
+      overflow-y: scroll;
+      margin-bottom: 1remhook" pour renvoyer la réponse de l'AI Agent:**
+
+    *   Double-clique sur le nœud "Respond to Webhook" pour;
+      background-color: #f9f9f9;
+    }
+
+    .message {
+      margin-bottom: 0.5rem;
+      line-height: 1.4;
+    }
+
+    .user-message {
+      text-align: right;
+      color: #007bff;
+    }
+
+    .bot-message {
+      text-align: left;
+      color: #28a745;
+    }
+  </style>
+
+</head>
+<body>
+<div class="container">
+   <h1>Évaluation Univers ouvrir sa fenêtre de configuration.
+    *   Dans le champ "String" (l'endroit où tu avais mis "Message reçu"), remplace le texte `"Message reçu"` par l'expression : `{{$json["0itaire</h1>
+   <p class="instructions">Veuillez vous identifier et commencer l'évaluation.</p>
+
+   <div id="chatbox"></div>
+
+   <div class="input-group">
+     <label for="studentId">Identifiant étudiant:</label>
+     <input type="text" id="studentId">
+   </div>
+   <div class="input-group">
+     <label for="userInput">Votre réponse:</label>
+     <textarea id="userInput"></textarea>
+   </div>
+   <button id="submitBtn">Envoyer</button>
+</div>
+
+<"].generation}}` ou `{{$json[0].response}}` ou `{{$json.generation}}` ou  `{{$json.response}}`
+        *   *Explication :* Cette expression récupère la réponse générée par l'AI Agent, que tu vas envoyer au formulaire. Assure toi que le chemin d’access est le bon.
+*   **b) Vérifier que le Workflow est Actif:**
+    *   En haut à droite de l'interface n8n, assure-toi que le bouton estscript>
+
+    const chatbox = document.getElementById('chatbox');
+    const studentIdInput = document.getElementById('studentId');
+    const userInput = document.getElementById('userInput');
+    const submitBtn = document.getElementById('submitBtn');
+
+    function addMessage(message, sender) { sur "Active" (et non "Inactive"). Si le workflow est inactif, le webhook ne fonctionnera pas.
+*   c) **(Optionnel) Gérer les Erreurs** : Ajouter, si on le souhaite, une gestion des erreurs. Cela implique d'ajouter un nœud "IF" pour vérifier s'il y a eu une erreur pendant le processus et renvoyer une réponse d'erreur appropriée au formulaire. Cela dépasse le cadre de cette configuration simple.
+
+**2. Fichier `index.html` Complet (avec JavaScript mis à jour)**
+
+Remplace *tout* le contenu de
+      const messageElement = document.createElement('div');
+      messageElement.classList.add('message');
+      messageElement.classList.add(sender === 'user' ? 'user-message' : 'bot-message');
+      messageElement.textContent = message;
+      chatbox.appendChild ton fichier `index.html` par le code suivant :
+
+```html
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">(messageElement);
+      chatbox.scrollTop = chatbox.scrollHeight;
+    }
+  submitBtn.addEventListener('click', async () => {
+      const studentId = studentIdInput.value;
+      const userMessage = userInput.value;
+      if (studentId && userMessage) {
+          addMessage(userMessage, 'user');
+          userInput.value = ''; // Clear input after sending
+          try {
+            const response = await fetch("URL du Webhook copié Precedement", { // Remplace ceci par ton URL de webhook !!!
+              method: 'POST',
+              headers: {
+    <title>Évaluation Universitaire</title>
+    <style>
+         body {
             font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            line-height: 1.6;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ studentId: studentId, userInput: userMessage })
+            });
+
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
         }
+
         .container {
-            border: 1px solid #ddd;
+            background-color: white;
             border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #2c3e50;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 400px; /* Ajustez la largeur selon vos besoins */
             text-align: center;
         }
-        .form-group {
-            margin-bottom: 15px;
+
+        h1 {
+
+
+    const data = await response.json();
+    addMessage(data.response, 'bot');  // La la reponse du WebHook est dans réponse !
+
+} catch (error) {
+    console.error('Fetch error:', error);
+    addMessage('Error communicating with the chatbot.',            color: #333;
+            margin-bottom: 20px;
         }
+
+        .instructions {
+            color: #555;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
         label {
             display: block;
             margin-bottom: 5px;
+            color: #333;
             font-weight: bold;
         }
-        input, textarea {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        textarea {
-            height: 100px;
-            resize: vertical;
-        }
-        button {
-            background-color: #3498db;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        button:hover {
-            background-color: #2980b9;
-        }
-        .messages {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #f9f9f9;
-            border-radius: 4px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        .question {
-            background-color: #e8f4fc;
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 10px;
-        }
-        .debug-panel {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #f5f5f5;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            display: none;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Évaluation Universitaire</h1>
-        
-        <div class="messages" id="chat-messages">
-            <div class="question">Veuillez vous identifier pour commencer l'évaluation.</div>
-        </div>
-        
-        <div class="form-group">
-            <label for="studentId">Identifiant étudiant:</label>
-            <input type="text" id="studentId" name="studentId" required>
-        </div>
-        
-        <div class="form-group">
-            <label for="response">Votre réponse:</label>
-            <textarea id="response" name="response" required></textarea>
-        </div>
-        
-        <button id="submit-btn" onclick="sendResponse()">Envoyer</button>
-        
-        <div class="debug-panel" id="debug-panel">
-            <h3>Panneau de débogage</h3>
-            <div id="debug-output"></div>
-        </div>
-    </div>
 
-    <script>
-        // Remplacez cette URL par l'URL de votre webhook N8N (URL de production)
-        const webhookUrl = "https://n8n.med-innovation-tech.com/webhook-test/eval-chatbot";
-        
-        let conversationHistory = [];
-        
-        // Fonction pour ajouter des informations de débogage
-        function addDebugInfo(message) {
-            console.log(message);
-            
-            // Activer cette ligne si vous voulez afficher les logs dans l'interface
-            // document.getElementById('debug-panel').style.display = 'block';
-            // const debugOutput = document.getElementById('debug-output');
-            // debugOutput.innerHTML += `<p>${new Date().toLocaleTimeString()}: ${message}</p>`;
-        }
-        
-        function sendResponse() {
-            const studentId = document.getElementById('studentId').value;
-            const response = document.getElementById('response').value;
-            
-            if (!studentId || !response) {
-                alert("Veuillez remplir tous les champs.");
-                return;
-            }
-            
-            // Désactiver le bouton pendant l'envoi
-            const submitBtn = document.getElementById('submit-btn');
-            submitBtn.disabled = true;
-            submitBtn.textContent = "Envoi en cours...";
-            
-            // Préparer les données à envoyer au webhook
-            const data = {
-                studentId: studentId,
-                response: response,
-                history: conversationHistory
-            };
-            
-            // Log des données envoyées
-            addDebugInfo("Données envoyées au webhook: " + JSON.stringify(data));
-            
-            // Envoyer la requête au webhook
-            fetch(webhookUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => {
-                addDebugInfo("Statut de la réponse: " + response.status);
-                if (!response.ok) {
-                    addDebugInfo("Erreur HTTP: " + response.status + " " + response.statusText);
-                    throw new Error("Statut HTTP: " + response.status);
-                }
-                return response.json();
-            })
-            .then(data => {
-                // Log des données reçues
-                addDebugInfo("Données reçues du webhook: " + JSON.stringify(data));
-                
-                // Ajouter les messages à l'historique
-                conversationHistory.push({
-                    role: "student",
-                    content: response
-                });
-                
-                if (data.question) {
-                    conversationHistory.push({
-                        role: "professor",
-                        content: data.question
-                    });
-                    
-                    // Afficher la nouvelle question
-                    const messagesDiv = document.getElementById('chat-messages');
-                    const studentResponse = document.createElement('div');
-                    studentResponse.textContent = "Vous: " + response;
-                    studentResponse.style.marginBottom = "10px";
-                    
-                    const professorQuestion = document.createElement('div');
-                    professorQuestion.textContent = "Professeur: " + data.question;
-                    professorQuestion.className = "question";
-                    
-                    messagesDiv.appendChild(studentResponse);
-                    messagesDiv.appendChild(professorQuestion);
-                    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-                } else {
-                    addDebugInfo("Attention: La réponse ne contient pas de champ 'question'");
-                }
-                
-                // Vider le champ de réponse
-                document.getElementById('response').value = "";
-                
-                // Réactiver le bouton
-                submitBtn.disabled = false;
-                submitBtn.textContent = "Envoyer";
-            })
-            .catch(error => {
-                addDebugInfo("Erreur: " + error.message);
-                console.error('Erreur complète:', error);
-                alert("Une erreur s'est produite. Veuillez réessayer. Consultez la console pour plus de détails.");
-                
-                // Réactiver le bouton
-                submitBtn.disabled = false;
-                submitBtn.textContent = "Envoyer";
-            });
-        }
-    </script>
+        input[type="text"],
+ 'bot');
+}
+      } else {
+          alert('Please enter both student ID and your response.');
+      }
+    });
+
+</script>
 </body>
 </html>
