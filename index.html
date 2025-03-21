@@ -7,172 +7,133 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            line-height: 1.6;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
         }
+
         .container {
-            border: 1px solid #ddd;
+            background-color: white;
             border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #2c3e50;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 400px; /* Ajustez la largeur selon vos besoins */
             text-align: center;
         }
-        .form-group {
-            margin-bottom: 15px;
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
         }
+
+        .instructions {
+            color: #555;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
         label {
             display: block;
             margin-bottom: 5px;
+            color: #333;
             font-weight: bold;
         }
-        input, textarea {
+
+        input[type="text"],
+        textarea {
             width: 100%;
-            padding: 8px;
+            padding: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            box-sizing: border-box;
-        }
-        textarea {
-            height: 100px;
-            resize: vertical;
-        }
-        button {
-            background-color: #3498db;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
-            cursor: pointer;
+            box-sizing: border-box; /* Important pour que le padding ne change pas la largeur */
             font-size: 16px;
         }
+
+        textarea {
+            resize: vertical; /* Permet de redimensionner verticalement */
+            height: 100px;
+        }
+
+         button {
+            background-color: #2980b9; /* Bleu */
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            width: 100%;
+        }
+
         button:hover {
-            background-color: #2980b9;
+            background-color: #3498db; /* Bleu plus clair au survol */
         }
-        .messages {
-            margin-top: 20px;
+        /* Plus besoin de ce style car chatbox est supprimé d'ici
+        #chatbox {
+            border: 1px solid #ccc;
             padding: 10px;
+            height: 200px;
+            overflow-y: scroll;
+            margin-bottom: 1rem;
             background-color: #f9f9f9;
-            border-radius: 4px;
-            max-height: 300px;
-            overflow-y: auto;
         }
-        .question {
-            background-color: #e8f4fc;
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 10px;
+*/
+        .message {
+          margin-bottom: 0.5rem;
+          line-height: 1.4;
         }
+
+        .user-message {
+          text-align: right;
+          color: #007bff; /* Bleu pour les messages de l'utilisateur */
+        }
+
+        .bot-message {
+          text-align: left;
+          color: #28a745; /* Vert pour les messages du chatbot */
+        }
+
+
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Évaluation Universitaire</h1>
+        <p class="instructions">Veuillez vous identifier pour commencer l'évaluation.</p>
 
-        <div class="messages" id="chat-messages">
-            <div class="question">L'évaluation va commencer.</div>
+        <div class="input-group">
+            <label for="studentId">Identifiant étudiant:</label>
+            <input type="text" id="studentId">
         </div>
-
-        <div class="form-group">
-            <label for="response">Votre réponse:</label>
-            <textarea id="response" name="response" required></textarea>
+        <div class="input-group">
+            <label for="userInput">Votre réponse:</label>
+            <textarea id="userInput"></textarea>
         </div>
-
-        <button id="submit-btn" onclick="sendResponse()">Envoyer</button>
+        <button id="submitBtn">Envoyer</button>
     </div>
 
     <script>
-        // URL de production du webhook N8N
-        const webhookUrl = "https://n8n.med-innovation-tech.com/webhook-test/eval-chatbot";
+      const studentIdInput = document.getElementById('studentId');
+      const userInput = document.getElementById('userInput');
+      const submitBtn = document.getElementById('submitBtn');
 
-        let conversationHistory = [];
+      function addMessage(message, sender) {
+        // On créera un élément pour afficher les messages plus tard,
+        // quand on aura besoin d'afficher la réponse du chatbot.
+        // Pour l'instant, cette fonction ne fait rien.
+      }
 
-        function sendResponse() {
-            const response = document.getElementById('response').value;
+      // La partie envoie de la requête sera complétée dans la prochaine étape
 
-            if (!response) {
-                alert("Veuillez entrer votre réponse.");
-                return;
-            }
-
-            // Désactiver le bouton pendant l'envoi
-            const submitBtn = document.getElementById('submit-btn');
-            submitBtn.disabled = true;
-            submitBtn.textContent = "Envoi en cours...";
-
-            // Préparer les données à envoyer au webhook
-            const data = {
-                chatInput: {
-                   response: response,
-                   history: conversationHistory
-                }
-            };
-
-            // Log des données envoyées
-            console.log("Données envoyées:", data);
-
-            // Envoyer la requête au webhook
-            fetch(webhookUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => {
-                console.log("Statut de la réponse:", response.status);
-                return response.json();
-            })
-            .then(data => {
-                console.log("Données reçues:", data);
-
-                // Ajouter les messages à l'historique
-                conversationHistory.push({
-                    role: "student",
-                    content: response
-                });
-
-                if (data.question) {
-                    conversationHistory.push({
-                        role: "professor",
-                        content: data.question
-                    });
-
-                    // Afficher la nouvelle question
-                    const messagesDiv = document.getElementById('chat-messages');
-                    const studentResponse = document.createElement('div');
-                    studentResponse.textContent = "Vous: " + response;
-                    studentResponse.style.marginBottom = "10px";
-
-                    const professorQuestion = document.createElement('div');
-                    professorQuestion.textContent = "Professeur: " + data.question;
-                    professorQuestion.className = "question";
-
-                    messagesDiv.appendChild(studentResponse);
-                    messagesDiv.appendChild(professorQuestion);
-                    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-                }
-
-                // Vider le champ de réponse
-                document.getElementById('response').value = "";
-
-                // Réactiver le bouton
-                submitBtn.disabled = false;
-                submitBtn.textContent = "Envoyer";
-            })
-            .catch(error => {
-                console.error('Erreur:', error);
-                alert("Une erreur s'est produite. Veuillez réessayer.");
-
-                // Réactiver le bouton
-                submitBtn.disabled = false;
-                submitBtn.textContent = "Envoyer";
-            });
-        }
     </script>
 </body>
 </html>
