@@ -140,6 +140,18 @@
             margin-top: 10px;
             display: none;
         }
+        
+        .debug-info {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #666;
+            text-align: left;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -176,6 +188,11 @@
         <button id="sendButton" disabled>Envoyer</button>
         <div class="loading" id="loading">Chargement</div>
         <div class="error-message" id="connectionError"></div>
+        
+        <div class="debug-info" id="debugInfo">
+            <h4>Informations de débogage</h4>
+            <div id="debugContent"></div>
+        </div>
     </div>
 
     <script>
@@ -192,6 +209,25 @@
             const saveConfigButton = document.getElementById('saveConfigButton');
             const configError = document.getElementById('configError');
             const connectionError = document.getElementById('connectionError');
+            const debugInfo = document.getElementById('debugInfo');
+            const debugContent = document.getElementById('debugContent');
+            
+            // Activer le mode débogage (à définir sur false en production)
+            const debugMode = true;
+            
+            if (debugMode) {
+                debugInfo.style.display = 'block';
+            }
+            
+            function logDebug(message) {
+                if (debugMode) {
+                    const timestamp = new Date().toLocaleTimeString();
+                    const logEntry = document.createElement('div');
+                    logEntry.textContent = `[${timestamp}] ${message}`;
+                    debugContent.appendChild(logEntry);
+                    debugContent.scrollTop = debugContent.scrollHeight;
+                }
+            }
             
             // Vérifier si la configuration est déjà enregistrée dans le localStorage
             const savedN8nUrl = localStorage.getItem('n8nUrl');
@@ -200,6 +236,7 @@
             if (savedN8nUrl && savedWebhookPath) {
                 n8nUrlInput.value = savedN8nUrl;
                 webhookPathInput.value = savedWebhookPath;
+                logDebug(`Configuration chargée depuis localStorage: ${savedN8nUrl}/${savedWebhookPath}`);
             }
             
             // Fonction pour valider l'URL
@@ -216,6 +253,8 @@
             function saveConfig() {
                 const n8nUrl = n8nUrlInput.value.trim();
                 const webhookPath = webhookPathInput.value.trim();
+                
+                configError.style.display = 'none';
                 
                 // Valider l'URL
                 if (!n8nUrl || !isValidUrl(n8nUrl)) {
@@ -235,26 +274,85 @@
                 localStorage.setItem('n8nUrl', n8nUrl);
                 localStorage.setItem('webhookPath', webhookPath);
                 
-                // Masquer le panneau de configuration
-                configPanel.style.display = 'none';
+                logDebug(`Configuration enregistrée: ${n8nUrl}/${webhookPath}`);
                 
-                // Activer le bouton d'envoi
-                sendButton.disabled = false;
-                
-                // Ajouter un message initial du bot
-                addBotMessage("Bonjour, merci de me communiquer votre Nom et Prénom.");
+                // Tester la connexion au webhook
+                testWebhookConnection(n8nUrl, webhookPath)
+                    .then(success => {
+                        if (success) {
+                            // Masquer le panneau de configuration
+                            configPanel.style.display = 'none';
+                            
+                            // Activer le bouton d'envoi
+                            sendButton.disabled = false;
+                            
+                            // Ajouter un message initial du bot
+                            addBotMessage("Bonjour, merci de me communiquer votre Nom et Prénom.");
+                            
+                            logDebug("Test de connexion réussi, interface prête");
+                        } else {
+                            configError.textContent = "Impossible de se connecter au webhook. Vérifiez l'URL et assurez-vous que le webhook est actif.";
+                            configError.style.display = 'block';
+                            logDebug("Échec du test de connexion");
+                        }
+                    })
+                    .catch(error => {
+                        configError.textContent = `Erreur lors du test de connexion: ${error.message}`;
+                        configError.style.display = 'block';
+                        logDebug(`Erreur de connexion: ${error.message}`);
+                    });
+            }
+            
+            // Fonction pour tester la connexion au webhook
+            async function testWebhookConnection(n8nUrl, webhookPath) {
+                try {
+                    logDebug("Test de la connexion au webhook...");
+                    
+                    // Construire l'URL complète du webhook
+                    const baseUrl = n8nUrl.endsWith('/') ? n8nUrl.slice(0, -1) : n8nUrl;
+                    const path = webhookPath.startsWith('/') ? webhookPath.slice(1) : webhookPath;
+                    const webhookUrl = `${baseUrl}/${path}`;
+                    
+                    // Envoyer une requête OPTIONS pour vérifier les en-têtes CORS
+                    const response = await fetch(webhookUrl, {
+                        method: 'OPTIONS',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    logDebug(`Réponse OPTIONS: ${response.status} ${response.statusText}`);
+                    
+                    // Vérifier les en-têtes CORS
+                    const corsHeader = response.headers.get('Access-Control-Allow-Origin');
+                    logDebug(`En-tête CORS: ${corsHeader || 'non défini'}`);
+                    
+                    return response.ok;
+                } catch (error) {
+                    logDebug(`Erreur lors du test: ${error.message}`);
+                    throw error;
+                }
             }
             
             // Événement de clic sur le bouton d'enregistrement de la configuration
             saveConfigButton.addEventListener('click', saveConfig);
             
-            // Si la configuration est déjà enregistrée, masquer le panneau de configuration et activer le bouton d'envoi
+            // Si la configuration est déjà enregistrée, tester la connexion automatiquement
             if (savedN8nUrl && savedWebhookPath) {
-                configPanel.style.display = 'none';
-                sendButton.disabled = false;
-                
-                // Ajouter un message initial du bot
-                addBotMessage("Bonjour, merci de me communiquer votre Nom et Prénom.");
+                testWebhookConnection(savedN8nUrl, savedWebhookPath)
+                    .then(success => {
+                        if (success) {
+                            configPanel.style.display = 'none';
+                            sendButton.disabled = false;
+                            addBotMessage("Bonjour, merci de me communiquer votre Nom et Prénom.");
+                            logDebug("Connexion automatique réussie");
+                        } else {
+                            logDebug("Échec de la connexion automatique");
+                        }
+                    })
+                    .catch(error => {
+                        logDebug(`Erreur de connexion automatique: ${error.message}`);
+                    });
             }
             
             // Fonction pour ajouter un message de l'utilisateur au chatbox
@@ -318,6 +416,15 @@
                 try {
                     // Construire l'URL complète du webhook
                     const webhookUrl = getWebhookUrl();
+                    logDebug(`Envoi de la requête à ${webhookUrl}`);
+                    
+                    // Préparer les données à envoyer
+                    const requestData = {
+                        studentId: studentIdValue,
+                        userInput: userInputValue
+                    };
+                    
+                    logDebug(`Données envoyées: ${JSON.stringify(requestData)}`);
                     
                     // Envoyer la requête au webhook N8N
                     const response = await fetch(webhookUrl, {
@@ -325,26 +432,28 @@
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({
-                            studentId: studentIdValue,
-                            userInput: userInputValue
-                        })
+                        body: JSON.stringify(requestData)
                     });
+                    
+                    logDebug(`Réponse reçue: ${response.status} ${response.statusText}`);
                     
                     if (!response.ok) {
                         throw new Error(`Erreur HTTP: ${response.status}`);
                     }
                     
                     const data = await response.json();
+                    logDebug(`Données reçues: ${JSON.stringify(data)}`);
                     
                     // Afficher la réponse du bot
                     if (data && data.response) {
                         addBotMessage(data.response);
                     } else {
                         addBotMessage("Désolé, je n'ai pas pu traiter votre demande.");
+                        logDebug("Réponse reçue sans champ 'response'");
                     }
                 } catch (error) {
                     console.error('Erreur:', error);
+                    logDebug(`Erreur: ${error.message}`);
                     connectionError.textContent = `Erreur de connexion: ${error.message}. Vérifiez l'URL de votre instance N8N et assurez-vous que le webhook est correctement configuré.`;
                     connectionError.style.display = 'block';
                     addBotMessage("Désolé, une erreur s'est produite lors de la communication avec le serveur.");
@@ -360,6 +469,7 @@
                     if (studentIdLabel.style.display !== 'none') {
                         studentIdLabel.style.display = 'none';
                         studentId.style.display = 'none';
+                        logDebug("Champ studentId masqué après la première soumission");
                     }
                 }
             }
@@ -374,6 +484,8 @@
                     sendMessage();
                 }
             });
+            
+            logDebug("Initialisation de l'interface terminée");
         });
     </script>
 </body>
