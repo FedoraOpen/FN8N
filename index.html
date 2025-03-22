@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chatbot Métrorragies - Mode No-CORS</title>
+    <title>Chatbot Métrorragies - Solution Iframe</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -90,6 +90,13 @@
             color: #666;
             font-style: italic;
         }
+        
+        iframe {
+            display: none;
+            width: 0;
+            height: 0;
+            border: 0;
+        }
     </style>
 </head>
 <body>
@@ -99,6 +106,9 @@
         <textarea id="user-input" placeholder="Tapez votre message ici..."></textarea>
         <button id="send-button">Envoyer</button>
         <div id="status"></div>
+        
+        <!-- Iframe caché pour la communication sans problème CORS -->
+        <iframe id="communication-frame" name="communication-frame"></iframe>
     </div>
 
     <script>
@@ -110,6 +120,7 @@
         const userInput = document.getElementById('user-input');
         const sendButton = document.getElementById('send-button');
         const status = document.getElementById('status');
+        const iframe = document.getElementById('communication-frame');
         
         // Ajouter un message du bot au démarrage
         addBotMessage("Bonjour, je suis votre professeur pour l'évaluation sur les métrorragies. Comment puis-je vous aider ?");
@@ -132,8 +143,37 @@
             chatbox.scrollTop = chatbox.scrollHeight;
         }
         
-        // Fonction pour envoyer un message au webhook avec mode no-cors
-        async function sendMessage() {
+        // Fonction pour créer un formulaire et l'envoyer via l'iframe
+        function sendViaForm(message) {
+            // Créer un formulaire dynamique
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = WEBHOOK_URL;
+            form.target = 'communication-frame';
+            
+            // Ajouter les champs de données
+            const userInputField = document.createElement('input');
+            userInputField.type = 'hidden';
+            userInputField.name = 'userInput';
+            userInputField.value = message;
+            form.appendChild(userInputField);
+            
+            const studentIdField = document.createElement('input');
+            studentIdField.type = 'hidden';
+            studentIdField.name = 'studentId';
+            studentIdField.value = 'Étudiant';
+            form.appendChild(studentIdField);
+            
+            // Ajouter le formulaire au document et le soumettre
+            document.body.appendChild(form);
+            form.submit();
+            
+            // Supprimer le formulaire après soumission
+            document.body.removeChild(form);
+        }
+        
+        // Fonction pour envoyer un message au webhook via un formulaire
+        function sendMessage() {
             const message = userInput.value.trim();
             
             if (!message) {
@@ -151,33 +191,20 @@
             status.textContent = "Envoi en cours...";
             
             try {
-                // Préparer les données à envoyer
-                const data = {
-                    userInput: message,
-                    studentId: "Étudiant" // Valeur fixe simplifiée
-                };
+                // Envoyer via formulaire et iframe
+                sendViaForm(message);
                 
-                // Envoyer la requête avec mode no-cors
-                const response = await fetch(WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data),
-                    mode: 'no-cors' // Utiliser le mode no-cors pour contourner les restrictions CORS
-                });
-                
-                // Avec le mode no-cors, on ne peut pas lire la réponse
-                // On affiche donc un message générique
-                addBotMessage("Votre message a été envoyé. En raison des limitations techniques, je ne peux pas afficher la réponse directe du serveur. Veuillez continuer votre conversation.");
-                
-                status.textContent = "Message envoyé";
+                // Comme nous ne pouvons pas récupérer la réponse de l'iframe facilement,
+                // nous affichons un message générique
+                setTimeout(() => {
+                    addBotMessage("Votre message a été envoyé. Veuillez continuer votre conversation.");
+                    status.textContent = "Message envoyé";
+                    sendButton.disabled = false;
+                }, 1000);
             } catch (error) {
                 console.error('Erreur:', error);
                 addBotMessage("Désolé, une erreur s'est produite lors de la communication avec le serveur.");
                 status.textContent = `Erreur: ${error.message}`;
-            } finally {
-                // Réactiver le bouton d'envoi
                 sendButton.disabled = false;
             }
         }
