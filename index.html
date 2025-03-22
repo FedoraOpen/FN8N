@@ -103,7 +103,7 @@
 
     <script>
         // Configuration - À MODIFIER
-        const WEBHOOK_URL = "https://n8n.med-innovation-tech.com/webhook-test/eval-chatbot";
+        const WEBHOOK_URL = "https://n8n.med-innovation-tech.com/webhook/eval-chatbot";
         
         // Éléments DOM
         const chatbox = document.getElementById('chatbox');
@@ -132,7 +132,7 @@
             chatbox.scrollTop = chatbox.scrollHeight;
         }
         
-        // Fonction pour envoyer un message au webhook
+        // Fonction pour envoyer un message au webhook via un proxy CORS
         async function sendMessage() {
             const message = userInput.value.trim();
             
@@ -151,14 +151,17 @@
             status.textContent = "Envoi en cours...";
             
             try {
+                // Utiliser un proxy CORS pour contourner les problèmes CORS
+                const corsProxyUrl = "https://corsproxy.io/?";
+                
                 // Préparer les données à envoyer
                 const data = {
                     userInput: message,
                     studentId: "Étudiant" // Valeur fixe simplifiée
                 };
                 
-                // Envoyer la requête au webhook
-                const response = await fetch(WEBHOOK_URL, {
+                // Envoyer la requête via le proxy CORS
+                const response = await fetch(corsProxyUrl + encodeURIComponent(WEBHOOK_URL), {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
