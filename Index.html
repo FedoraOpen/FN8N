@@ -1,175 +1,73 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Évaluation Universitaire</title>
+    <title>AI Chatbot</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            line-height: 1.6;
-        }
-        .container {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input, textarea {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        textarea {
-            height: 100px;
-            resize: vertical;
-        }
-        button {
-            background-color: #3498db;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        button:hover {
-            background-color: #2980b9;
-        }
-        .messages {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #f9f9f9;
-            border-radius: 4px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        .question {
-            background-color: #e8f4fc;
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 10px;
-        }
+        body { font-family: sans-serif; }
+        #chat-container { width: 80%; margin: 20px auto; border: 1px solid #ccc; padding: 10px; }
+        #chat-log { height: 300px; overflow-y: scroll; border: 1px solid #eee; padding: 5px; margin-bottom: 10px; }
+        #user-input { width: 100%; padding: 8px; box-sizing: border-box; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Évaluation Universitaire</h1>
-        
-        <div class="messages" id="chat-messages">
-            <div class="question">Veuillez vous identifier pour commencer l'évaluation.</div>
-        </div>
-        
-        <div class="form-group">
-            <label for="studentId">Identifiant étudiant:</label>
-            <input type="text" id="studentId" name="studentId" required>
-        </div>
-        
-        <div class="form-group">
-            <label for="response">Votre réponse:</label>
-            <textarea id="response" name="response" required></textarea>
-        </div>
-        
-        <button id="submit-btn" onclick="sendResponse()">Envoyer</button>
+    <div id="chat-container">
+        <h1>AI Chatbot</h1>
+        <div id="chat-log"></div>
+        <input type="text" id="user-input" placeholder="Votre message..." />
     </div>
 
     <script>
-        // Remplacez cette URL par l'URL de votre webhook N8N
-        const webhookUrl = "VOTRE_URL_WEBHOOK_ICI";
-        
-        let conversationHistory = [];
-        
-        function sendResponse() {
-            const studentId = document.getElementById('studentId').value;
-            const response = document.getElementById('response').value;
-            
-            if (!studentId || !response) {
-                alert("Veuillez remplir tous les champs.");
-                return;
-            }
-            
-            // Désactiver le bouton pendant l'envoi
-            const submitBtn = document.getElementById('submit-btn');
-            submitBtn.disabled = true;
-            submitBtn.textContent = "Envoi en cours...";
-            
-            // Préparer les données à envoyer au webhook
-            const data = {
-                studentId: studentId,
-                response: response,
-                history: conversationHistory
-            };
-            
-            // Envoyer la requête au webhook
-            fetch(webhookUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Ajouter les messages à l'historique
-                conversationHistory.push({
-                    role: "student",
-                    content: response
-                });
-                
-                if (data.question) {
-                    conversationHistory.push({
-                        role: "professor",
-                        content: data.question
-                    });
-                    
-                    // Afficher la nouvelle question
-                    const messagesDiv = document.getElementById('chat-messages');
-                    const studentResponse = document.createElement('div');
-                    studentResponse.textContent = "Vous: " + response;
-                    studentResponse.style.marginBottom = "10px";
-                    
-                    const professorQuestion = document.createElement('div');
-                    professorQuestion.textContent = "Professeur: " + data.question;
-                    professorQuestion.className = "question";
-                    
-                    messagesDiv.appendChild(studentResponse);
-                    messagesDiv.appendChild(professorQuestion);
-                    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        const webhookUrl = 'https://n8n.med-innovation-tech.com/webhook/REPLACE_WITH_NEW_WEBHOOK_ID/chat'; // <-- IMPORTANT: Replace this!
+        const userInput = document.getElementById('user-input');
+        const chatLog = document.getElementById('chat-log');
+
+        userInput.addEventListener('keydown', async (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevent default form submission
+                const message = userInput.value;
+                if (message.trim() !== '') {
+                    addUserMessage(message);
+                    userInput.value = '';
+                    await sendToChatbot(message);
                 }
-                
-                // Vider le champ de réponse
-                document.getElementById('response').value = "";
-                
-                // Réactiver le bouton
-                submitBtn.disabled = false;
-                submitBtn.textContent = "Envoyer";
-            })
-            .catch(error => {
-                console.error('Erreur:', error);
-                alert("Une erreur s'est produite. Veuillez réessayer.");
-                
-                // Réactiver le bouton
-                submitBtn.disabled = false;
-                submitBtn.textContent = "Envoyer";
-            });
+            }
+        });
+
+        async function sendToChatbot(message) {
+            try {
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (data && data[0] && data[0].json && data[0].json.response) {
+                    addChatbotMessage(data[0].json.response);
+                } else {
+                    addChatbotMessage("Erreur : Réponse du chatbot invalide.");
+                }
+
+            } catch (error) {
+                console.error("Erreur lors de l'envoi au chatbot:", error);
+                addChatbotMessage("Erreur de communication avec le chatbot.");
+            }
         }
+
+        function addUserMessage(message) {
+            chatLog.innerHTML += `<p><strong>Vous:</strong> ${message}</p>`;
+            chatLog.scrollTop = chatLog.scrollHeight; // Scroll to bottom
+        }
+
+        function addChatbotMessage(message) {
+            chatLog.innerHTML += `<p><strong>Chatbot:</strong> ${message}</p>`;
+            chatLog.scrollTop = chatLog.scrollHeight; // Scroll to bottom
+        }
+
     </script>
 </body>
 </html>
