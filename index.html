@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chatbot Métrorragies</title>
+    <title>Chatbot Métrorragies - Mode No-CORS</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -132,7 +132,7 @@
             chatbox.scrollTop = chatbox.scrollHeight;
         }
         
-        // Fonction pour envoyer un message au webhook via un proxy CORS
+        // Fonction pour envoyer un message au webhook avec mode no-cors
         async function sendMessage() {
             const message = userInput.value.trim();
             
@@ -151,39 +151,27 @@
             status.textContent = "Envoi en cours...";
             
             try {
-                // Utiliser un proxy CORS pour contourner les problèmes CORS
-                const corsProxyUrl = "https://corsproxy.io/?";
-                
                 // Préparer les données à envoyer
                 const data = {
                     userInput: message,
                     studentId: "Étudiant" // Valeur fixe simplifiée
                 };
                 
-                // Envoyer la requête via le proxy CORS
-                const response = await fetch(corsProxyUrl + encodeURIComponent(WEBHOOK_URL), {
+                // Envoyer la requête avec mode no-cors
+                const response = await fetch(WEBHOOK_URL, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify(data),
+                    mode: 'no-cors' // Utiliser le mode no-cors pour contourner les restrictions CORS
                 });
                 
-                if (!response.ok) {
-                    throw new Error(`Erreur HTTP: ${response.status}`);
-                }
+                // Avec le mode no-cors, on ne peut pas lire la réponse
+                // On affiche donc un message générique
+                addBotMessage("Votre message a été envoyé. En raison des limitations techniques, je ne peux pas afficher la réponse directe du serveur. Veuillez continuer votre conversation.");
                 
-                // Traiter la réponse
-                const responseData = await response.json();
-                
-                // Afficher la réponse du bot
-                if (responseData && responseData.response) {
-                    addBotMessage(responseData.response);
-                } else {
-                    addBotMessage("Désolé, je n'ai pas pu comprendre votre message.");
-                }
-                
-                status.textContent = "";
+                status.textContent = "Message envoyé";
             } catch (error) {
                 console.error('Erreur:', error);
                 addBotMessage("Désolé, une erreur s'est produite lors de la communication avec le serveur.");
