@@ -156,22 +156,22 @@
         // Configuration
         const webhookUrl = 'https://n8n.med-innovation-tech.com/webhook/chatbot';
         const sessionId = 'session_' + Math.random().toString(36).substring(2, 15);
-        
+
         // Éléments DOM
         const chatArea = document.getElementById('chat-area');
         const userInput = document.getElementById('user-input');
         const sendButton = document.getElementById('send-button');
         const statusElement = document.getElementById('status');
-        
+
         // Initialisation
-        // window.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('DOMContentLoaded', () => {
             // Démarrer automatiquement la conversation
-           // statusElement.innerHTML = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
-            // setTimeout(() => {
-               // sendMessageToWebhook("Bonjour");
-            // }, 1000);
-        // });
-        
+            statusElement.innerHTML = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
+            setTimeout(() => {
+                sendMessageToWebhook("Bonjour");
+            }, 1000);
+        });
+
         // Fonctions
         function addUserMessage(text) {
             const messageDiv = document.createElement('div');
@@ -180,7 +180,7 @@
             chatArea.appendChild(messageDiv);
             chatArea.scrollTop = chatArea.scrollHeight;
         }
-        
+
         function addBotMessage(text) {
             const messageDiv = document.createElement('div');
             messageDiv.className = 'message bot-message';
@@ -189,13 +189,13 @@
             chatArea.appendChild(messageDiv);
             chatArea.scrollTop = chatArea.scrollHeight;
         }
-        
+
         async function sendMessageToWebhook(message) {
             // Désactiver l'interface pendant la communication
             userInput.disabled = true;
             sendButton.disabled = true;
             statusElement.innerHTML = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
-            
+
             try {
                 const response = await fetch(webhookUrl, {
                     method: 'POST',
@@ -208,13 +208,13 @@
                         sessionId: sessionId
                     })
                 });
-                
+
                 if (!response.ok) {
                     throw new Error(`Erreur HTTP: ${response.status}`);
                 }
-                
-                const data = await response.json();
-                addBotMessage(data.message);
+
+                const data = await response.text(); // MODIFICATION IMPORTANTE : response.text() au lieu de response.json()
+                addBotMessage(data); // MODIFICATION IMPORTANTE : addBotMessage(data) au lieu de addBotMessage(data.message)
                 statusElement.textContent = "";
             } catch (error) {
                 console.error('Erreur:', error);
@@ -225,9 +225,10 @@
                 userInput.disabled = false;
                 sendButton.disabled = false;
                 userInput.focus();
+                statusElement.textContent = "";
             }
         }
-        
+
         // Événements
         sendButton.addEventListener('click', () => {
             const message = userInput.value.trim();
@@ -237,7 +238,7 @@
                 userInput.value = '';
             }
         });
-        
+
         userInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 const message = userInput.value.trim();
@@ -251,3 +252,4 @@
     </script>
 </body>
 </html>
+
