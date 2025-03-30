@@ -179,7 +179,7 @@
         // Génération d'un ID de session unique sans dépendre de sessionStorage
         const sessionId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
 
-        const webhookUrl = 'https://n8n.med-innovation-tech.com/webhook/chatbot';
+        const webhookUrl = 'https://n8n.med-innovation-tech.com:9000/webhook/chatbot';
 
         function addMessage(sender, text) {
             const messageDiv = document.createElement('div');
